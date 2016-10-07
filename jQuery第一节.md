@@ -213,7 +213,8 @@ jQuery.fn = jQuery.prototype = {
     同时$('li')[1]就是原生的对象了。就可以进行操作了。
     $('li')[1].style.background = 'red';
 ---
-    //第一个就是选择器，第二个是第一个的执行环境，是上下文。比如$('li','#div')就是#div下面的li，不会去找其他的li     api：jQuery( selector [, context ] )
+    //第一个就是选择器，第二个是第一个的执行环境，是上下文。比如$('li','#div')就是#div下面的li，不会去找其他的li 
+    //api：jQuery( selector [, context ] )
     init : function(selector, context, rootjQuery) {
         var match, elem;
         //1、如果$(""),$(null),$(undefined),$(false)
@@ -384,5 +385,5 @@ jQuery.fn = jQuery.prototype = {
 ```
 
 ---
-++# (96, 283) 给jq对象，添加一些对象和方法~~；~~++
+~~# (96, 283) 给jq对象，添加一些对象和方法~~
 
