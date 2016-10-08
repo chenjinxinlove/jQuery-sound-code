@@ -270,4 +270,34 @@ alert('1');
 			jQuery( document ).trigger("ready").off("ready");
 		}
 	},
+	//判断数函数吗
+	isFunction : function(){
+	   return jQuery.type(obj) === "function";
+	}
+	isArray : Array.isArray,
+	//是否是window
+	isWindow : function(obj){
+	    return obj != null && obj === obj.window;
+	},
+	//是否是为数字
+	isNumberic : function(obj){
+	    //把obj转成数字，不是就转成NaN就是true，！true；isFinite判断是有限数2的53
+	    return !isNaN(parseFloat(obj) && isFinite(obj)
+	},
+	判断数据类型
+	type : function(obj){
+	    //null 或者 undefined
+	    if ( obj == null ) {
+			return String( obj );
+		}
+		// Support: Safari <= 5.1 (functionish RegExp)
+		return typeof obj === "object" || typeof obj === "function" ?
+			class2type[ core_toString.call(obj) ] || "object" :
+			typeof obj;
+<!--		jQuery.each("Boolean Number String Function Array Date RegExp Object Error".split(" "), function(i, name) {-->
+<!--	class2type[ "[object " + name + "]" ] = name.toLowerCase();-->
+<!--});-->
+<!--	}-->
+	
+	
 })
