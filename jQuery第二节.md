@@ -99,7 +99,175 @@ jQuery.extend = jQuery.fn.extend = function(){
         
         }
     }
+    return target;
 
 }
 ```
 
+//jquery拓展工具方法
+
+```
+
+-------简化版本---------------------------------------------------------------
+
+
+jQuery.extend({
+    
+    expando :　生成唯一jq字符串（内部）
+    noConflict() : 防止冲突
+    isReady : DOM是否加载完(内部)
+    holdReady() : 推迟Dom加载
+    ready() : 准备dom触发
+    isFunction : 是否为数组
+    isArray() : 是否是组数
+    isWindow() : 是否是window
+    isNumberic() : 是否是为数字
+    type() : 判断数据类型
+    isPlainObject() : 是否为对象自变量
+    isEmptyObject() : 是否为空的对象
+    error() : 抛出异常
+    parseHTML() : 解析异常
+    parseJSON() : 解析JSON
+    parseXML() : 解析XML
+    noop() : 空函数
+    globalEval() : 全局解析JS
+    camelCase() : 转驼峰
+    nodeName() : 是否为指定节点名(内部)
+    each() : 遍历集合
+    trim() : 去前后空格
+    makeArray() : 类数组转真数组
+    inArray() : 数组版indexof
+    merge() : 合并数组
+    grep() : 过滤新数组
+    map() : 映射新数组
+    guid : 唯一标示符(内部)
+    proxy() : 改变this的指向
+    access() : 多功能值操作(内部)
+    now() : 当前时间
+    swap() : css交换(交换)
+
+})
+------------------------------------------------------------------------------
+
+jQuery.extend({
+    //生成唯一jq字符串（内部）
+    expando: "jQuery" + (core_version + Math.random()).replace(/\D/g,""),
+    //防止冲突
+    ---使用说明----
+    1、
+    <!--var dd = $.noConflict();-->
+    <!--$ = 123;-->
+    <!--dd(function () {-->
+    <!--    //123-->
+    <!--    console.log($)-->
+    <!--})-->
+    2、
+    <!--$ = 123;-->
+    <!--script src='jquery'-->
+    <!--var dd = $.noConflict();-->
+  
+    <!--dd(function () {-->
+    <!--    //123-->
+    <!--    console.log($)-->
+    <!--})-->
+    ----------
+    noConflict:function(deep){
+        //解决第二种
+        //在代码上面有 _$ = window.$  就把123存到了_$
+        if(window.$ === jQuery){ 
+        //放弃$
+            window.$ = _$;
+        }
+        //放弃jQuery那个对外接口
+        //_jQuery = window.jQuery
+        if(deep && window.jQuery === jQuery){
+            放弃jQuery
+            window.jQuery = _jQuery;
+        }
+        //那是解决$出现jquery之下（1）
+        return jQuery;
+    },
+    //DOM是否加载完(内部)
+------DOM加载说明-------------------------------------------------------------------
+1、$(function(){}) 和 window.onload = function(){} 的区别
+前者是dom加载完，后者是所有的东西都加载完
+2、利用原生DOMContentLoaded
+3、$(function(){})  => $(documnet).ready(function(){}) => $().ready()
+
+|=> jQuery.ready.promise().done(fn) => 监听DOMContentLoaded =>$.ready() => fn
+
+4、
+
+jQuery.ready.promise = function( obj ) {
+
+    //第一次可以进来，之后就进不来了，加载一次
+	if ( !readyList ) {
+
+		readyList = jQuery.Deferred();
+		//dom已经加载完，就不用再加载。readyState是标示的状态
+		if ( document.readyState === "complete" ) {
+		//ie会提前触发，加延时
+			setTimeout( jQuery.ready );
+		} else {
+		//有些浏览器会缓存load，所有那个先加载完成就使用那个都可以
+			document.addEventListener( "DOMContentLoaded", completed, false );
+			window.addEventListener( "load", completed, false );
+		}
+		//取消事件，那个没加载完就直接取消
+		<!--completed = function() {-->
+		<!--document.removeEventListener( "DOMContentLoaded", completed, false );-->
+		<!--window.removeEventListener( "load", completed, false );-->
+		<!--jQuery.ready();-->
+	};
+		
+	}
+	return readyList.promise( obj );
+};
+------------------------------------------------------------------------------------   
+    isReady: false,
+    readyWait: 1,
+    //holdReady(true) 推迟加载 holdReady(false) 释放加载
+-----使用说明-----------------------------------------------------------------------
+1、在异步加载的事件使用
+a.js  alert('2')
+$.getScript('a.js',function(){
+
+})
+alert('1');
+先弹出1，在弹出2因为异步
+
+$.holdReady(true);
+$.getScript('a.js',function(){
+    $.holdReady(false);
+})
+alert('1');
+就是2 1 的弹出顺序
+------------------------------------------------------------------------------------    
+	holdReady: function( hold ) {
+		if ( hold ) {
+			jQuery.readyWait++;
+		} else {
+			jQuery.ready( true );
+		}
+	},
+	//wait 就是上面的true
+	ready: function( wait ) {
+	   //jQuery.readyWait不为0就返回
+		if ( wait === true ? --jQuery.readyWait : jQuery.isReady ) {
+			return;
+		}
+
+		jQuery.isReady = true;
+        //
+		if ( wait !== true && --jQuery.readyWait > 0 ) {
+			return;
+		}
+        //不到参数来到那，相当于把 document, [ jQuery ]传给fn
+		readyList.resolveWith( document, [ jQuery ] );
+        
+        //$(documet).on('ready',function(){})的写法
+		if ( jQuery.fn.trigger ) {
+			jQuery( document ).trigger("ready").off("ready");
+		}
+	},
+})
