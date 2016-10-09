@@ -298,6 +298,66 @@ alert('1');
 <!--	class2type[ "[object " + name + "]" ] = name.toLowerCase();-->
 <!--});-->
 <!--	}-->
-	
+    //是否为对象自变量
+	isPlainObject : function(){
+	//不等于，DOM节点，不是window
+	    if(jQuery.type(obj) !== "object" || obj.nodeType || jQuery.isWindow(obj)){
+	        return false;
+	    }
+	    try {
+			if ( obj.constructor &&
+					!core_hasOwn.call( obj.constructor.prototype, "isPrototypeOf" ) ) {
+				return false;
+			}
+		} catch ( e ) {
+			return false;
+		}
+
+		// If the function hasn't returned already, we're confident that
+		// |obj| is a plain object, created by {} or constructed with new Object
+		return true;
+	},
+	//是否为空的对象
+	isEmptyObject: function( obj ) {
+		var name;
+		for ( name in obj ) {
+			return false;
+		}
+		return true;
+	},
+    //报错
+	error: function( msg ) {
+		throw new Error( msg );
+	},
+	//解析html  第三个参数keepScripts设为true就可以存script
+	parseHTML: function( data, context, keepScripts ) {
+		if ( !data || typeof data !== "string" ) {
+			return null;
+		}
+		//省略参数
+		if ( typeof context === "boolean" ) {
+			keepScripts = context;
+			context = false;
+		}
+		context = context || document;
+        //判断是单标签
+		var parsed = rsingleTag.exec( data ),
+			scripts = !keepScripts && [];
+
+		// Single tag
+		if ( parsed ) {
+			return [ context.createElement( parsed[1] ) ];
+		}
+
+		parsed = jQuery.buildFragment( [ data ], context, scripts );
+
+		if ( scripts ) {
+			jQuery( scripts ).remove();
+		}
+
+		return jQuery.merge( [], parsed.childNodes );
+	},
+	parseJSON: JSON.parse,
+
 	
 })
