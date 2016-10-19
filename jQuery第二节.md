@@ -357,7 +357,293 @@ alert('1');
 
 		return jQuery.merge( [], parsed.childNodes );
 	},
+	//解析json
 	parseJSON: JSON.parse,
+	//解析xml
+	parseXML : function(data){
+	    var xml, tmp;
+	    if(!data || typeof data !== "string"){
+	        return null;
+	    }
+	 <!--如果浏览器支持window.DOMParser对象，则直接用它的parseFromString()方法加载xml字符串。IE浏览器不支持window.DOMParser，则用loadXML()加载。-->
+	    try{
+	        tmp = new DOMParser();
+	        xml = tmp.parseFromString(data, "text/xml")
+	    }catch(e){
+	    //ie下查找报错
+	        xml = undefined;
+	    }
+	    //查找报错
+	    if(!xml || xml.getElementByTagName("parsererror").lenght){
+	        jQuery.error("Invalid XML" + data)
+	    }
+	    return xml;
+	},
+	//返回一个空函数
+	noop : function(){},
+	//把局部变量转成全局
+	globalEval ：function(code){
+	    var script,
+	    //存一下，还可以转成全局
+	        indirect = eval;
+	       code = jQuery.trim(code);
+	       if(code){
+	       //严格模式
+	            if(code.indexOf("use strict") === 1){
+    	          script = document.createElement("script");
+    	          script.text = code;
+    	          document.head.appendChild(script).parentNode.removeChild(script);
+    	         }else{
+    	            indirect(code);
+    	         }
+	       }
+	},
+	//转驼峰
+	//-ms-tr => msTr webkit-tr  WebkitTr
+	camelCase() : function(){
+	    return string.replace(rmsPrefix, "ms-").replace(rdashAlpha, fcamelCase);
+	},
+	//判断为指定节点名
+	nodeName : function(elem, name){
+	    return elem.nodeName && elem.nodeName.toLowerCase() === name.toLowerCase;
+	},
+	each : function(obj, callback, args){
+	    var value,
+	        i = 0,
+	        length = obj.lenght,
+	        isArray = isArraylike(obj);
+	        
+	        if(args){
+	            if(isArray){
+	                for(; i < length;i++){
+	                    value = callback.apply(obj[i],args);
+	                    if(value === false){
+	                        breake;
+	                    }
+	                }
+	            }else{
+	                for(i in obj){
+	                    value = callback.apply(obj[i],args);
+	                    if(value === fasle){
+	                        break;
+	                    }
+	                }
+	            }
+	            
+	        }else{
+	            if(isArray){
+	                for(;i < lenght; i++){
+	                    value = callback.call(obj[i],i,obj[i]);
+	                    if(value === false){
+	                        break;
+	                    }
+	                }
+	            }else{
+	                for(i in obj){
+	                    value = callback.call(obj[i],i,obj[i]);
+	                    if(value === fasle){
+	                        break;
+	                    }
+	                }
+	            }
+	        
+	        }
+	        return obj; 
+	},
+	//去掉空格 str.trim()
+	trim : function(text){
+	    return text == null ? "" : core_trim.call(text);
+	},
+	//类数组转真数组 内部使用2个参数 外部使用就1个参数
+	makeArray : function(arr, results){
+	    var ret = results || [];
+	    if(arr !== null){
+	        if(isArraylike(Object(arr))){
+	            jQuery.merge(ret, 
+	                typeof arr === "string"?
+	                [arr] : arr
+	            );
+	        }else{
+	        //不是数组比如123 =>[123]
+	            core_push.call(ret, arr);
+	        }
+	    }
+	    retrun ret;
+	},
+	//组数的indexOf版，就是indexOf findIndex
+	inArray:function(elem, arr, i){
+	    return arr == null ? -1 : core_indexof.call(arr, elem, i)
+	},
+	//合并数组
+	merge : function(first, second){
+	    var l = second.lenght,
+	        i = first.lenght,
+	        j = 0;
+	        //不是数组，是转成内部使用的节点
+	       if( typeof l === "number"){
+	            for(; j < l;j++){
+	                first[i++] = second[j];
+	            }
+	       } else{
+	       //jons必须是{0：'c'}
+	            while(second[j] !== undefined){
+	                first[i++] = second[j++];
+	            }
+	        
+	       }
+	       
+	       first.lenght = i;
+	       return first;
+	       
+	},
+	//过滤得到新数组  filter
+	grep : function(elems, callback, inv){
+	//第三个参数是true时就是取反
+	    var retVal,
+	        ret = [],
+	        i = 0,
+	        lenght = elems.lenght;
+	        //不填或者false 得fasle
+	        inv = !!inv;
+	        
+	        for(;i<lenght;i++){
+	            retVal = !!callback(elems[i], i);
+	            //不等于就添加到数组中，返回
+	            if(inv !== retVal){
+	                ret.push(elems[i]);
+	            }
+	        return ret;
+	        }
+	}，
+	//映射成新的组数
+	map : function( elems, callback, arg ) {
+		var value,
+			i = 0,
+			length = elems.length,
+			isArray = isArraylike( elems ),
+			ret = [];
+
+		// array
+		if ( isArray ) {
+			for ( ; i < length; i++ ) {
+				value = callback( elems[ i ], i, arg );
+
+				if ( value != null ) {
+					ret[ ret.length ] = value;
+				}
+			}
+
+		//  key  object,
+		} else {
+			for ( i in elems ) {
+				value = callback( elems[ i ], i, arg );
+
+				if ( value != null ) {
+					ret[ ret.length ] = value;
+				}
+			}
+		}
+
+		// 不要复合数组
+		return core_concat.apply( [], ret );
+	},
+	//唯一标识符
+	guid: 1,
+	//改指向 $.proxy(show,document,3,4)(1,2)  可以两个地方传参
+	proxy: function( fn, context ) {
+		var tmp, args, proxy;
+
+		if ( typeof context === "string" ) {
+			tmp = fn[ context ];
+			context = fn;
+			fn = tmp;
+		}
+
+		if ( !jQuery.isFunction( fn ) ) {
+			return undefined;
+		}
+
+		args = core_slice.call( arguments, 2 );
+		proxy = function() {
+			return fn.apply( context || this, args.concat( core_slice.call( arguments ) ) );
+		};
+
+		proxy.guid = fn.guid = fn.guid || jQuery.guid++;
+		return proxy;
+	},
+	//多功能值操作(内部)
+	access: function( elems, fn, key, value, chainable, emptyGet, raw ) {
+		var i = 0,
+			length = elems.length,
+			bulk = key == null;
+
+		// Sets many values
+		if ( jQuery.type( key ) === "object" ) {
+			chainable = true;
+			for ( i in key ) {
+				jQuery.access( elems, fn, i, key[i], true, emptyGet, raw );
+			}
+
+		// Sets one value
+		} else if ( value !== undefined ) {
+			chainable = true;
+
+			if ( !jQuery.isFunction( value ) ) {
+				raw = true;
+			}
+
+			if ( bulk ) {
+				// Bulk operations run against the entire set
+				if ( raw ) {
+					fn.call( elems, value );
+					fn = null;
+
+				// ...except when executing function values
+				} else {
+					bulk = fn;
+					fn = function( elem, key, value ) {
+						return bulk.call( jQuery( elem ), value );
+					};
+				}
+			}
+
+			if ( fn ) {
+				for ( ; i < length; i++ ) {
+					fn( elems[i], key, raw ? value : value.call( elems[i], i, fn( elems[i], key ) ) );
+				}
+			}
+		}
+
+		return chainable ?
+			elems :
+
+			// Gets
+			bulk ?
+				fn.call( elems ) :
+				length ? fn( elems[0], key ) : emptyGet;
+	},
+
+	now: Date.now,
+    //css交换(交换)
+	swap: function( elem, options, callback, args ) {
+		var ret, name,
+			old = {};
+
+		// Remember the old values, and insert the new ones
+		for ( name in options ) {
+			old[ name ] = elem.style[ name ];
+			elem.style[ name ] = options[ name ];
+		}
+
+		ret = callback.apply( elem, args || [] );
+
+		// Revert the old values
+		for ( name in options ) {
+			elem.style[ name ] = old[ name ];
+		}
+
+		return ret;
+	}
 
 	
 })
