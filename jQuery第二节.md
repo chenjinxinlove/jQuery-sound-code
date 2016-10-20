@@ -647,3 +647,49 @@ alert('1');
 
 	
 })
+
+jQuery.ready.promise = function( obj ) {
+	if ( !readyList ) {
+
+		readyList = jQuery.Deferred();
+
+		if ( document.readyState === "complete" ) {
+			setTimeout( jQuery.ready );
+		} else {
+			document.addEventListener( "DOMContentLoaded", completed, false );
+			window.addEventListener( "load", completed, false );
+		}
+	}
+	return readyList.promise( obj );
+};
+
+// Populate the class2type map
+jQuery.each("Boolean Number String Function Array Date RegExp Object Error".split(" "), function(i, name) {
+	class2type[ "[object " + name + "]" ] = name.toLowerCase();
+});
+//类数组
+function isArraylike( obj ) {
+	var length = obj.length,
+		type = jQuery.type( obj );
+
+	if ( jQuery.isWindow( obj ) ) {
+		return false;
+	}
+
+	if ( obj.nodeType === 1 && length ) {
+		return true;
+	}
+
+	return type === "array" || type !== "function" &&
+	//0是需要单独判断
+		( length === 0 ||
+		typeof length === "number" && length > 0 && ( length - 1 ) in obj );
+}
+
+rootjQuery = jQuery(document);
+
+
+```
+++~~扩展一些工具方法;~~++
+```
+
